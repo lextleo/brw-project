@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flood Detection Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Chart.js 4.4.4 – pinned version, UMD build (no adapter needed) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ─── Critical alert banner (hidden until CRITICAL) ─── -->
+  <div id="critical-banner" class="critical-banner" hidden>
+    ⚠️ CRITICAL WATER LEVEL — Flooding Risk!
+  </div>
+
+  <!-- ─── Header ─── -->
+  <header class="header">
+    <div class="header-left">
+      <h1 class="logo">🌊 Flood Monitor</h1>
+      <span id="connection-dot" class="connection-dot offline"></span>
+      <span id="connection-text" class="connection-text">OFFLINE</span>
+      <span id="demo-badge" class="demo-badge" hidden>DEMO</span>
+    </div>
+    <div class="header-right">
+      <button id="btn-sound" class="btn-icon" title="Enable sound alerts (click to unlock audio)">🔇</button>
+      <button id="btn-theme" class="btn-icon" title="Toggle dark/light mode">🌗</button>
+      <button id="btn-settings" class="btn-icon" title="Settings">⚙️</button>
+    </div>
+  </header>
+
+  <!-- ─── Main dashboard ─── -->
+  <main class="main">
+
+    <!-- Status + Tank card -->
+    <section class="card status-section">
+      <div class="tank-container">
+        <div class="tank" aria-label="Water tank visualization">
+          <div id="tank-fill" class="tank-fill" style="height: 0%">
+            <div class="tank-wave"></div>
+          </div>
+          <span id="tank-label" class="tank-label">0%</span>
+          <!-- Threshold markers – positions set by JS -->
+          <div id="threshold-warning" class="threshold-marker warning-marker">
+            <span class="threshold-tag">⚠ Warning</span>
+          </div>
+          <div id="threshold-critical" class="threshold-marker critical-marker">
+            <span class="threshold-tag">🔴 Critical</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="readings">
+        <div id="status-badge" class="status-badge offline">OFFLINE</div>
+
+        <div class="reading-grid">
+          <div class="reading-item">
+            <span class="reading-label">Water Depth</span>
+            <span class="reading-value-row">
+              <span id="reading-depth" class="reading-value">—</span>
+              <span class="reading-unit">cm</span>
+            </span>
+          </div>
+          <div class="reading-item">
+            <span class="reading-label">Sensor Distance</span>
+            <span class="reading-value-row">
+              <span id="reading-distance" class="reading-value">—</span>
+              <span class="reading-unit">cm</span>
+            </span>
+          </div>
+          <div class="reading-item">
+            <span class="reading-label">Fill Level</span>
+            <span class="reading-value-row">
+              <span id="reading-level" class="reading-value">—</span>
+              <span class="reading-unit">%</span>
+            </span>
+          </div>
+        </div>
+
+        <p id="last-updated" class="last-updated">Last updated: never</p>
+      </div>
+    </section>
+
+    <!-- Chart card -->
+    <section class="card chart-section">
+      <h2>Water Depth — Last 10 Minutes</h2>
+      <div class="chart-wrapper">
+        <canvas id="depth-chart"></canvas>
+      </div>
+    </section>
+
+    <!-- Event log card -->
+    <section class="card log-section">
+      <div class="log-header">
+        <h2>Event Log</h2>
+        <button id="btn-clear-log" class="btn-small" title="Clear log">Clear</button>
+      </div>
+      <div id="event-log" class="event-log">
+        <p class="log-empty">No events yet. Waiting for data…</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ─── Settings slide-over panel ─── -->
+  <div id="settings-overlay" class="settings-overlay" hidden></div>
+  <aside id="settings-panel" class="settings-panel" hidden>
+    <div class="settings-header">
+      <h2>⚙️ Settings</h2>
+      <button id="btn-close-settings" class="btn-icon" title="Close">✕</button>
+    </div>
+    <form id="settings-form" class="settings-form" autocomplete="off">
+      <div class="form-group">
+        <label for="input-ip">ESP32 IP Address</label>
+        <input type="text" id="input-ip" placeholder="10.145.101.27" required>
+        <small>The ESP32 must be on the same network</small>
+      </div>
+      <div class="form-group">
+        <label for="input-tank-height">Tank Height (cm)</label>
+        <input type="number" id="input-tank-height" min="1" max="500" step="0.1" required>
+      </div>
+      <div class="form-group">
+        <label for="input-poll-interval">Poll Interval (ms)</label>
+        <input type="number" id="input-poll-interval" min="500" max="30000" step="100" required>
+        <small>Minimum 500 ms. Default 1000 ms.</small>
+      </div>
+      <div class="form-group toggle-group">
+        <label class="toggle-label" for="input-demo-mode">
+          <input type="checkbox" id="input-demo-mode">
+          <span>Demo Mode</span>
+        </label>
+        <small>Use simulated data (no ESP32 needed)</small>
+      </div>
+      <button type="submit" class="btn-save">💾 Save Settings</button>
+    </form>
+  </aside>
+
+  <!-- ─── Footer ─── -->
+  <footer class="footer">
+    <small>ESP32 Flood Detection Dashboard · Phase 1 · Local use only (HTTP)</small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
